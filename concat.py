@@ -21,7 +21,6 @@ csv_files = glob.glob('checkmarx/Reports/*.csv')
 combined_df = pd.DataFrame()
 
 
-
 # 逐个读取并合并每个CSV文件
 for file in csv_files:
     df = pd.read_csv(file)
@@ -29,10 +28,26 @@ for file in csv_files:
     print (line)
     line = line[:-4]
     print (line)
-    df['Apps'] = line
-    df['Owner'] = result_array[line]
+    df['Apps'] = df['SrcFileName'].str.split('/').str[1]
+    df['Owner'] = df['Apps'].str.replace('./', '').map(result_array)
+    df['QueryPath'] = df['QueryPath'].str.replace('版本', 'version', regex=False)
     combined_df = pd.concat([combined_df, df], ignore_index=True)
-
+    # 新增列 'Check Result (Resolved / NAP)' 并初始化为空值
+    combined_df['Result Severity'] = combined_df['Result Severity'].replace({
+        '中風險': 'medium',
+        '高風險': 'high',
+        '低風險': 'low'
+    })
+    combined_df['Check Result (Resolved / NAP)'] = ''
+    combined_df['Result Status'] = combined_df['Result Status'].replace({
+        '新的': 'new',
+        '舊的': 'old'
+    })
+    combined_df['Result State'] = combined_df['Result State'].replace({
+        '校驗': 'check',
+        '舊的': 'old'
+    })
+    
 # 将合并后的DataFrame写入新的CSV文件
 output_file = 'combined_file.csv'
 combined_df.to_csv(output_file, index=False, encoding = 'big5')
