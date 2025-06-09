@@ -22,11 +22,12 @@ csv_file = args.file
 import pandas as pd
 
 # 讀取 CSV 檔案
-with open("ls.txt", "r")as file:
+with open("r.txt", "r")as file:
     line = file.readline()
     while line:
         line = line.strip()
         line = 'Checkmarx/Reports/' + line + '.csv'
+        line = 'combined_file.csv'
         print(line)
         df = pd.read_csv(line)
 
